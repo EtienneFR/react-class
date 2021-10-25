@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import ThemeContext from "./ThemeContext";
 import useBreedList from "./useBreedList";
 import Results from "./Results";
+import Pagination from "./Pagination";
 
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
 
@@ -12,16 +13,33 @@ const SearchParams = () => {
   const [pets, setPets] = useState([]);
   const [breeds] = useBreedList(animal);
   const [theme, setTheme] = useContext(ThemeContext);
+  const [page, setPage] = useState(0);
+  const [numberOfResults, setNumberOfResults] = useState(0);
 
   useEffect(() => {
     requestPets();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    requestPets();
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setPage(0);
+    requestPets();
+  }, [animal] || [breed] || [location]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleChangePage = (data) => {
+    setPage(data);
+  };
+
   async function requestPets() {
     const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
+      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}&page=${page}`
     );
     const json = await res.json();
+    setNumberOfResults(json.numberOfResults);
     setPets(json.pets);
   }
 
@@ -89,7 +107,13 @@ const SearchParams = () => {
         </label>
         <button style={{ backgroundColor: theme }}>Submit</button>
       </form>
-      <Results pets={pets} />
+      <Results pets={pets}>
+        <Pagination
+          numberOfResults={numberOfResults}
+          handleChangePage={handleChangePage}
+          key={numberOfResults}
+        />
+      </Results>
     </div>
   );
 };

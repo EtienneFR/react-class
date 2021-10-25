@@ -1,6 +1,6 @@
 import Pet from "./Pet";
 
-const Results = ({ pets }) => {
+const Results = ({ pets, children }) => {
   return (
     <div className="search">
       {!pets.length ? (
@@ -18,6 +18,8 @@ const Results = ({ pets }) => {
           />
         ))
       )}
+
+      {!pets.length ? <span>No Result</span> : <div>{children}</div>}
     </div>
   );
 };
